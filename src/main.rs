@@ -11,6 +11,7 @@ fn main(){
     .add_systems(Startup, spawn_camera)
     .add_systems(Update, player_movement)
     .add_systems(Update, confine_player_movement)
+    .add_systems(Update, spawn_enemy)
     .run();
 }
 
@@ -73,7 +74,7 @@ pub fn player_movement(
 
 pub fn confine_player_movement(
     mut player_query: Query<&mut Transform, With<Player>>,
-    window_qiery: Query<&Window, With<PrimaryWindow>>
+    window_qiery: Query<&Window, With<PrimaryWindow>>,
 ) {
     if let Ok(mut player_transform) = player_query.get_single_mut() {
         let window = window_qiery.get_single().unwrap();
@@ -99,4 +100,23 @@ pub fn confine_player_movement(
         
         player_transform.translation = translation;
     }
+}
+
+
+#[derive(Component)]
+pub struct Enemy;
+
+pub fn spawn_enemy(
+    mut commands: Commands,
+    window_qiery: Query<&Window, With<PrimaryWindow>>,
+    enemy: Res<AssetServer>,
+) {
+    let window = window_qiery.get_single().unwrap();
+    let texture_handle = enemy.load("sprait/ball_red_large_alt.png");
+    commands.spawn(SpriteBundle {
+        texture: texture_handle,
+        transform: Transform::from_xyz(window.width() / 2.0, window.height() / 2.0, 0.0),
+        ..Default::default()
+    }).insert(Enemy);
+
 }
